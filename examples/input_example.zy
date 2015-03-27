@@ -1,0 +1,10 @@
+(-> f(@()
+    (.
+        (-> nome (<< "Digite o seu Nome: "))
+        (-> nascimento (, (<< "Digite o o ano em que voce nasceu: ")))
+        (-> idade (- (, (<< "Digite o ano atual: ")) nascimento))
+        (>> (+ (+ (+ nome " Voce tem ") (' idade)) " Anos"))
+    )
+))
+
+(f)
