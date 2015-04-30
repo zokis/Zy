@@ -56,7 +56,8 @@ def main(args=None):
     if len(args) == 1:
         run_repl(ZyREPL(runner))
     else:
-        with open(args[1], 'r') as f:
+        import codecs
+        with codecs.open(args[1], 'r', 'utf-8') as f:
             source = ''
             for line in f.xreadlines():
                 source += line
