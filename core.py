@@ -14,6 +14,24 @@ class Symbol(str):
     pass
 
 
+class Lambda(object):
+
+    def __init__(self, parms, body, env):
+        self.parms, self.body, self.env = parms, body, env
+
+    def __call__(self, *args):
+        return zy_eval(self.body, Env(self.parms, args, self.env))
+
+
+class Env(dict):
+    def __init__(self, parms=(), args=(), outer=None):
+        self.outer = outer
+        self.update(zip(parms, args))
+
+    def find(self, var):
+        return self if (var in self) else self.outer.find(var)
+
+
 class ZyString(str):
     def __div__(self, other):
         return map(ZyString, self.split(other))
@@ -61,7 +79,7 @@ ZyFalse = ZyBool(False)
 
 def atom(token):
     if token[0] == '"':
-        return ZyString(token[1:-1].decode('string_escape'))
+        return ZyString(token[1:-1].decode('utf-8'))
     try:
         return float(token)
     except ValueError:
@@ -119,15 +137,6 @@ def parse(program):
     return atomize(tokenize(program))
 
 
-class Env(dict):
-    def __init__(self, parms=(), args=(), outer=None):
-        self.outer = outer
-        self.update(zip(parms, args))
-
-    def find(self, var):
-        return self if (var in self) else self.outer.find(var)
-
-
 def standard_env():
     env = Env()
 
@@ -168,15 +177,6 @@ def standard_env():
 GLOBAL_ENV = standard_env()
 
 
-class Lambda(object):
-
-    def __init__(self, parms, body, env):
-        self.parms, self.body, self.env = parms, body, env
-
-    def __call__(self, *args):
-        return zy_eval(self.body, Env(self.parms, args, self.env))
-
-
 def zy_eval(x, env=GLOBAL_ENV):
     if isinstance(x, Symbol):
         return env.find(x)[x]
@@ -215,8 +215,8 @@ def to_zy_str(exp):
     if isinstance(exp, Symbol):
         return exp
     elif isinstance(exp, ZyString):
-        return '"%s"' % exp.encode('string_escape').replace('"', r'\"')
+        return '"%s"' % exp.encode('utf-8').replace('"', r'\"')
     elif isinstance(exp, list):
-        return '('+' '.join(map(to_zy_str, exp))+')'
+        return "(%s)" % ' '.join(map(to_zy_str, exp))
     else:
         return str(exp)
